@@ -57,7 +57,7 @@ if (!devMode) {
   config.DATABASE = {
     database: 'blog',
     user: 'haoolee',
-    password: '',
+    password: 'LIhao19931201',
     options: {
       host: 'haooleeblog.mysql.rds.aliyuncs.com', // 连接的 host 地址
       // host: 'rm-2zew5ww3bs5v00imzmo.mysql.rds.aliyuncs.com', // 连接的 host 外网地址 关闭中
