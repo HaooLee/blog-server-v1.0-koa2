@@ -12,6 +12,9 @@
 /.next/
 /out/
 
+config/*
+/config/*
+
 # production
 /build
 
