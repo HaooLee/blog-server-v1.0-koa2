@@ -13,6 +13,7 @@ const {
   findById,
   update,
   delete: del,
+  updateLike,
   outputList,
   delList
 } = require('../controllers/article')
@@ -20,7 +21,8 @@ const {
 router
   .post('/add', create) // 创建文章
   .get('/list', getList) // 获取文章列表
-  .get('/hotList',getHotList)
+  .get('/hotList',getHotList) //获取热门文章
+  .put('/like/:id',updateLike)
   .get('/md/:id', output) // 导出指定文章
   .post('/upload', upload) // 上传文章
   .post('/checkExist', checkExist) // 确认文章是否存在

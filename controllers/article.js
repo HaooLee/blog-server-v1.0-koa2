@@ -95,6 +95,10 @@ class ArticleController {
         order: [[CommentModel, 'createdAt', 'DESC'], [[CommentModel, ReplyModel, 'createdAt', 'ASC']]], // comment model order
         row: true,
       })
+      if(!data){
+        ctx.throw(404)
+        return
+      }
 
       const { type = 1 } = ctx.query
       // viewer count ++
@@ -112,11 +116,12 @@ class ArticleController {
     }
   }
 
+  // 获取热门文章列表
   static async getHotList(ctx){
     const { page = 1, pageSize = 10 } = ctx.query
     const data = await ArticleModel.findAll({
       attributes: { exclude: ['content'] },
-      order:[['viewCount','DESC']],
+      order:[['likeCount','DESC']],
       offset: (page - 1) * pageSize,
       limit: parseInt(pageSize)
     })
@@ -228,6 +233,24 @@ class ArticleController {
     }
   }
 
+  // 更新喜欢人数
+  static async  updateLike(ctx){
+    const validator = ctx.validate(ctx.params, {
+      id: Joi.number().required(),
+    })
+    if (validator) {
+      const article = await ArticleModel.findOne({
+        where: { id: ctx.params.id }
+      })
+      const like = await article.increment('likeCount')
+
+      ctx.body = {
+        likeCount: like.likeCount + 1
+      }
+    }
+
+  }
+
   // 修改文章
   static async update(ctx) {
     const validator = ctx.validate(
@@ -250,7 +273,7 @@ class ArticleController {
       const articleId = parseInt(ctx.params.id)
       const tagList = tags.map(tag => ({ name: tag, articleId }))
       const categoryList = categories.map(cate => ({ name: cate, articleId }))
-      await ArticleModel.update({ title, content, type, top }, { where: { id: articleId } })
+      await ArticleModel.update({ title, content, type, top, contentUpdatedAt:new Date() }, { where: { id: articleId } })
       await TagModel.destroy({ where: { articleId } })
       await TagModel.bulkCreate(tagList)
       await CategoryModel.destroy({ where: { articleId } })

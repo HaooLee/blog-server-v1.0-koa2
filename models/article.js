@@ -12,6 +12,13 @@ module.exports = (sequelize, dataTypes) => {
       likeCount: { type: dataTypes.INTEGER(11), defaultValue: 0 }, // 点赞数
       type: { type: dataTypes.BOOLEAN, defaultValue: true}, // 是否私密
       top: {type: dataTypes.BOOLEAN, defaultValue: false},
+      contentUpdatedAt: { //内容更新时间
+        type: dataTypes.DATE,
+        defaultValue: dataTypes.NOW,
+        get() {
+          return moment(this.getDataValue('contentUpdatedAt') || this.getDataValue('createdAt')).format('YYYY-MM-DD HH:mm:ss')
+        }
+      },
       createdAt: {
         type: dataTypes.DATE,
         defaultValue: dataTypes.NOW,
