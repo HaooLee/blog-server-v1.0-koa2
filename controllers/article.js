@@ -37,19 +37,19 @@ class ArticleController {
       title: Joi.string().required(),
       content: Joi.string(),
       desc: Joi.string(),
-      categoryList: Joi.array(),
-      tagList: Joi.array(),
+      categories: Joi.array(),
+      tags: Joi.array(),
       type: Joi.boolean(),
       top: Joi.boolean(),
     })
 
     if (validator) {
-      const { title, content, categoryList = [], tagList = [], authorId, type, top, desc } = ctx.request.body
+      const { title, content, categories:categoryList = [], tags:tagList = [], authorId, type, top, desc } = ctx.request.body
       console.log(title,ctx.request.body.title)
 
       const result = await ArticleModel.findOne({ where: { title } })
       if (result) {
-        ctx.throw(403, '创建失败，该文章已存在！')
+        ctx.answer(null,403, '创建失败，该文章已存在！')
       } else {
         const tags = tagList.map(t => ({ name: t }))
         const categories = categoryList.map(c => ({ name: c }))
@@ -57,7 +57,7 @@ class ArticleController {
           { title, content, authorId, tags, categories, type, top, desc },
           { include: [TagModel, CategoryModel] }
         )
-        ctx.body = data
+        ctx.answer(data)
       }
     }
   }
@@ -96,7 +96,7 @@ class ArticleController {
         row: true,
       })
       if(!data){
-        ctx.throw(404)
+        ctx.answer(null,404,'文章已删除或不存在')
         return
       }
 
@@ -112,7 +112,7 @@ class ArticleController {
           reply.user.github = JSON.parse(reply.user.github)
         })
       })
-      ctx.body = data
+      ctx.answer(data)
     }
   }
 
@@ -120,12 +120,20 @@ class ArticleController {
   static async getHotList(ctx){
     const { page = 1, pageSize = 10 } = ctx.query
     const data = await ArticleModel.findAll({
+      where:{
+        $not:{
+          id:-1
+        },
+        $and: {
+          type: true
+        },
+      },
       attributes: { exclude: ['content'] },
       order:[['likeCount','DESC']],
       offset: (page - 1) * pageSize,
       limit: parseInt(pageSize)
     })
-    ctx.body= data
+    ctx.answer(data)
   }
 
   // 获取文章列表
@@ -138,7 +146,7 @@ class ArticleController {
       tag: Joi.string(),
       preview: Joi.number(),
       order: Joi.string(),
-      type: Joi.boolean(),
+      type: [Joi.boolean(),Joi.string()],
     })
 
     if (validator) {
@@ -150,7 +158,7 @@ class ArticleController {
       if (order) {
         articleOrder = [order.split(' ')]
       }
-      if (type != null) {
+      if (type != null && type != 'all') {
         const data = await ArticleModel.findAndCountAll({
           where: {
             id: {
@@ -191,7 +199,7 @@ class ArticleController {
           })
         }
         data.rows = data.rows.sort((a, b) => b.top - a.top)
-        ctx.body = data
+        ctx.answer(data)
       } else {
         const data = await ArticleModel.findAndCountAll({
           where: {
@@ -228,7 +236,7 @@ class ArticleController {
           // })
         }
         data.rows = data.rows.sort((a, b) => b.top - a.top)
-        ctx.body = data
+        ctx.answer(data)
       }
     }
   }
@@ -244,9 +252,9 @@ class ArticleController {
       })
       const like = await article.increment('likeCount')
 
-      ctx.body = {
+      ctx.answer({
         likeCount: like.likeCount + 1
-      }
+      })
     }
 
   }
@@ -278,7 +286,9 @@ class ArticleController {
       await TagModel.bulkCreate(tagList)
       await CategoryModel.destroy({ where: { articleId } })
       await CategoryModel.bulkCreate(categoryList)
-      ctx.body = { type: type }
+
+      ctx.answer({ type })
+
     }
   }
 

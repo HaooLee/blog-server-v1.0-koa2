@@ -15,9 +15,8 @@ const codeMapList = [
  * @param {String} message - 提示语
  * @param {any} data - 返回给客户端的值
  *
- * @example app.context.client = func , ctx.client(200)
  */
-module.exports = function(code = 200, message, data = null) {
+module.exports = function(data = null,code = 200, message) {
   this.response.set('Content-Type', 'application/json')
   const item = codeMapList.find(d => d.code === code)
   const targetMessage = item ? item.message : ''

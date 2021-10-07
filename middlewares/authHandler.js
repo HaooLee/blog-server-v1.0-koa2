@@ -50,7 +50,7 @@ module.exports = async (ctx, next) => {
     } else {
       // ctx.status = 401
       // ctx.client(401)
-      ctx.throw(401)
+      ctx.answer(null,401)
     }
   } else {
     await next()

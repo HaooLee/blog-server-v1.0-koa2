@@ -1,4 +1,4 @@
-// const response = require('./response')
+const response = require('./response')
 const Joi = require('joi')
 
 /**
@@ -17,8 +17,8 @@ function validate(params = {}, schema = {}) {
   }
   return true
 }
-// 绑定 app.context  ctx.func 直接调用
+
 module.exports = {
-  // client: response, // 快捷设置给客户端的 response
+  answer: response,
   validate: validate
 }

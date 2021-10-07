@@ -78,32 +78,29 @@ class UserController {
   static async defaultLogin(ctx) {
     console.log(ctx.request.body)
     const validator = ctx.validate(ctx.request.body, {
-      account: Joi.string().required(),
+      username: Joi.string().required(),
       password: Joi.string(),
     })
     if (validator) {
-      const { account, password } = ctx.request.body
+      const { username, password } = ctx.request.body
 
       const user = await UserModel.findOne({
         where: {
           // $or: { email: account, username: account }
-          username: account,
+          username
         },
       })
 
       if (!user) {
-        // ctx.client(403, '用户不存在')
-        ctx.throw(403, '用户不存在')
+        ctx.answer(null, 403, '用户不存在')
       } else {
         const isMatch = await comparePassword(PSW.default.decrypt(password), user.password)
         if (!isMatch) {
-          // ctx.client(403, '密码不正确')
-          ctx.throw(403, '密码不正确')
+          ctx.answer(null, 403, '密码错误')
         } else {
           const { id, role } = user
           const token = createToken({ username: user.username, userId: id, role }) // 生成 token
-          // ctx.client(200, '登录成功', { username: user.username, role, userId: id, token })
-          ctx.body = { username: user.username, role, userId: id, token, email: user.email }
+          ctx.answer({ username: user.username, role, userId: id, token, email: user.email })
         }
       }
     }
@@ -173,7 +170,6 @@ class UserController {
       const { username, password, email } = ctx.request.body
       const result = await UserModel.findOne({ where: { email } })
       if (result) {
-        // ctx.client(403, '邮箱已被注册')
         ctx.throw(403, '邮箱已被注册')
       } else {
         const user = await UserModel.findOne({ where: { username } })
@@ -232,7 +228,7 @@ class UserController {
       })
 
       // ctx.client(200, 'success', result)
-      ctx.body = result
+      ctx.answer(result)
     }
   }
 
@@ -240,24 +236,19 @@ class UserController {
 
   static async userInfo(ctx){
     const info = getIdByToken(ctx)
-    console.log('info =======>',info)
-    // {
-    //   username: 'lihao',
-    //     userId: 47529555,
-    //   role: 1,
-    //   iat: 1631530099,
-    //   exp: 1634122099
-    // }
     if(info){
       const user = await UserModel.findOne({
         where: {
           // $or: { email: account, username: account }
           id:info.userId
         },
+        attributes:['id','username',"role",'email']
       })
-      ctx.body={ username: user.username, role:user.role, userId: user.id, email: user.email }
+
+      // ctx.answer({ username: user.username, role:user.role, userId: user.id, email: user.email })
+      ctx.answer(user)
     }else {
-      ctx.throw(403, 'token失效,请重新登录')
+      ctx.answer(null, 403, 'token失效,请重新登录')
     }
   }
 
