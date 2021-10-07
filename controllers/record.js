@@ -17,7 +17,7 @@ class RecordController {
     data.map(v => {
       v.articleId = v.articleId.toString()
     })
-    ctx.body = data
+    ctx.answer(data)
   }
 }
 

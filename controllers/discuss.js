@@ -49,15 +49,14 @@ class DiscussController {
       const ipInfo = await IpModel.findOne({ where: { ip: ctx.request.ip }, attributes: ['auth'] })
 
       if (ipInfo && !ipInfo.auth) {
-        ctx.status = 401
-        ctx.response.body = {
-          message: '该 IP 已被拉入黑名单'
-        }
+        // ctx.status = 401
+        // ctx.response.body = {
+        //   message: '该 IP 已被拉入黑名单'
+        // }
+        ctx.answer(null,401,'该 IP 已被拉入黑名单')
       } else if (user.disabledDiscuss) {
-        ctx.status = 401
-        ctx.response.body = {
-          message: '您已被禁言，请文明留言！'
-        }
+        ctx.answer(null,401,'您已被禁言，请文明留言！')
+
       } else {
         const ip = ctx.request.ip
         if (!commentId) {
@@ -73,7 +72,8 @@ class DiscussController {
 
         EMAIL_NOTICE.enable && sendingEmail(articleId, list, commentId, userId)
 
-        ctx.body = list
+        ctx.answer(list)
+
       }
     }
   }

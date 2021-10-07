@@ -8,7 +8,7 @@ class FragmentController {
       row: true,
       order: [['createdAt', 'DESC']],
     })
-    ctx.body = data
+    ctx.answer(data)
   }
 
   static async create(ctx) {
@@ -23,7 +23,7 @@ class FragmentController {
       const data = await FragmentModel.create(
         {author, content, createAt},
       )
-      ctx.body = data
+      ctx.answer(data)
     }
   }
 }

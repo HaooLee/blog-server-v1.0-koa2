@@ -11,8 +11,7 @@ class TagController {
       },
       order: [[sequelize.fn('COUNT', sequelize.col('name')), 'desc']]
     })
-
-    ctx.body = data
+    ctx.answer(data)
   }
 
   static async getCategoryList(ctx) {
@@ -24,8 +23,7 @@ class TagController {
       },
       order: [[sequelize.fn('COUNT', sequelize.col('name')), 'desc']]
     })
-
-    ctx.body = data
+    ctx.answer(data)
   }
 }
 
