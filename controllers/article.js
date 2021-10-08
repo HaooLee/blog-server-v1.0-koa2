@@ -158,17 +158,24 @@ class ArticleController {
       if (order) {
         articleOrder = [order.split(' ')]
       }
-      if (type != null && type != 'all') {
+      if (type != null) {
+
+        let typeQuery
+        if(type == 'all'){
+          typeQuery = {}
+        }else {
+          typeQuery = {
+            type: {
+              $eq: JSON.parse(type),
+            },
+          }
+        }
         const data = await ArticleModel.findAndCountAll({
           where: {
             id: {
               $not: -1, // 过滤关于页面的副本
             },
-            $and: {
-              type: {
-                $eq: JSON.parse(type),
-              },
-            },
+            $and: typeQuery,
             $or: {
               title: {
                 $like: `%${keyword}%`,
